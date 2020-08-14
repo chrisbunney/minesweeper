@@ -1,0 +1,3 @@
+# minesweeper
+My attempt at the classic Minesweeper game in Rust.
+Definitely a work-in-progress at the moment...

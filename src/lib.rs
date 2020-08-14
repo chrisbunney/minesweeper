@@ -3,6 +3,7 @@ pub mod minesweeper {
 
     use std::io;
     use std::cmp;
+    use rand::Rng;
 
     #[derive(Debug, PartialEq)]
     enum State {
@@ -15,7 +16,6 @@ pub mod minesweeper {
         state: State,
         is_mine: bool
     }
-
      
     pub struct Game {
         gridsize: usize,
@@ -25,14 +25,22 @@ pub mod minesweeper {
     }
 
     impl Game {
-        pub fn new(gridsize: usize) -> Game {
+
+        /// create a new Game object
+        pub fn new(gridsize: usize, mines: usize) -> Game {
             let mut grid: Vec<Cell> = Vec::with_capacity(gridsize*gridsize);
-            for i in 0..gridsize*gridsize {
+            for _ in 0..gridsize*gridsize {
                 grid.push(Cell{
                     state: State::Hidden,
-                    is_mine: i % 10 == 0
+                    is_mine: false
                 });
             }
+
+            let mut rng = rand::thread_rng();
+            for _ in 0..mines {
+                let i = rng.gen_range(0,gridsize*gridsize);
+                grid[i].is_mine = true;
+            };
 
             let g = Game {
                 gridsize,
@@ -44,6 +52,7 @@ pub mod minesweeper {
             g
         }
         
+        /// count total number of mines surrounding cell
         fn count_nbrs(&self, i: usize, j: usize) -> usize {
             let mut cnt = 0;
 
@@ -55,7 +64,6 @@ pub mod minesweeper {
 
             for ii in i1..=i2 {
                 for jj in j1..=j2 {
-                    println!("ii {} ,jj {}",ii,jj);
                     let idx = jj * self.gridsize + ii;
                     if self.grid[idx].is_mine { cnt += 1; }
                 }
@@ -63,8 +71,8 @@ pub mod minesweeper {
             cnt
         }
 
-        pub fn print_grid(&self) {
-            
+        /// show a printout of the grid to the terminal
+        pub fn print_grid(&self) {      
             for row in 0..self.gridsize {
                 let s = (0..self.gridsize)
                     .map(|i| {
@@ -89,7 +97,7 @@ pub mod minesweeper {
             }
         }
 
-        /// 
+        /// uncover the selected cell, and the neighbourhood.
         pub fn select_cell(&mut self, i: usize, j: usize) -> bool {
             self.moves += 1;
 
@@ -102,6 +110,7 @@ pub mod minesweeper {
             true
         }
 
+        /// updates this cell and the surroundung neighbourhood
         fn update_cells(&mut self, i: usize, j: usize) {
             let cnt = self.count_nbrs(i, j);
             self.grid[j*self.gridsize+i].state = State::Visible(cnt);

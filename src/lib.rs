@@ -1,7 +1,7 @@
 
 pub mod minesweeper {
 
-    use std::io::{self, Read};
+    use std::io;
     use std::cmp;
 
     #[derive(Debug, PartialEq)]
